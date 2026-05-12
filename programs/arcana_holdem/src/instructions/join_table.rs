@@ -3,10 +3,7 @@ use anchor_lang::system_program;
 use arcium_anchor::prelude::*;
 use arcium_client::idl::arcium::types::CallbackAccount;
 
-use crate::{
-    ArciumSignerAccount, DealCardsCallback, HoldemError, Table, TableState,
-    COMP_DEF_OFFSET_DEAL_CARDS, TABLE_SEED,
-};
+use crate::{ArciumSignerAccount, DealCardsCallback, TableState, COMP_DEF_OFFSET_DEAL_CARDS};
 
 /// Player B joins the table and immediately triggers the Arcium MXE deal.
 /// Blinds are posted atomically so the game moves straight to Dealing.
