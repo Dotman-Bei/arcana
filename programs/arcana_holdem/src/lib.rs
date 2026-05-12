@@ -7,14 +7,12 @@ pub mod instructions;
 
 pub use errors::*;
 pub use instructions::{
-    CloseTable, DealCallbackOutput, DealCardsCallback, InitTable, JoinTable,
+    CloseTable, DealCallbackOutput, InitTable,
     RevealShowdown, SubmitAction,
 };
 pub(crate) use instructions::{
     __client_accounts_close_table,
-    __client_accounts_deal_cards_callback,
     __client_accounts_init_table,
-    __client_accounts_join_table,
     __client_accounts_reveal_showdown,
     __client_accounts_submit_action,
 };
@@ -68,6 +66,8 @@ pub const TABLE_SEED: &[u8] = b"holdem";
 #[arcium_program]
 pub mod arcana_holdem {
     use super::*;
+    use crate::instructions::{DealCardsCallback, JoinTable};
+    use crate::instructions::{__client_accounts_deal_cards_callback, __client_accounts_join_table};
 
     // ── One-time setup ────────────────────────────────────────────────────────
 
