@@ -122,7 +122,7 @@ pub mod arcana_holdem {
     /// Stores masked hole cards and community cards on the Table PDA.
     #[arcium_callback(encrypted_ix = "deal_cards")]
     pub fn deal_callback(
-        ctx: Context<DealCallback>,
+        ctx: Context<DealCardsCallback>,
         output: SignedComputationOutputs<DealCallbackOutput>,
     ) -> Result<()> {
         instructions::deal_callback(ctx, output)
