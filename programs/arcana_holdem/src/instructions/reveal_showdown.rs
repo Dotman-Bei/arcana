@@ -41,13 +41,13 @@ pub fn reveal_showdown(ctx: Context<RevealShowdown>, mask: u64) -> Result<()> {
 
     if is_a {
         require!(hash_bytes == ctx.accounts.table.player_a_mask_commit, HoldemError::InvalidMaskReveal);
-        ctx.accounts.table.player_a_card1 ^= mask;
-        ctx.accounts.table.player_a_card2 ^= mask;
+        ctx.accounts.table.player_a_card1 = ctx.accounts.table.player_a_card1.wrapping_sub(mask);
+        ctx.accounts.table.player_a_card2 = ctx.accounts.table.player_a_card2.wrapping_sub(mask);
         ctx.accounts.table.player_a_mask_commit = [0u8; 32]; // signal: A has revealed
     } else {
         require!(hash_bytes == ctx.accounts.table.player_b_mask_commit, HoldemError::InvalidMaskReveal);
-        ctx.accounts.table.player_b_card1 ^= mask;
-        ctx.accounts.table.player_b_card2 ^= mask;
+        ctx.accounts.table.player_b_card1 = ctx.accounts.table.player_b_card1.wrapping_sub(mask);
+        ctx.accounts.table.player_b_card2 = ctx.accounts.table.player_b_card2.wrapping_sub(mask);
         ctx.accounts.table.player_b_mask_commit = [0u8; 32]; // signal: B has revealed
     }
 

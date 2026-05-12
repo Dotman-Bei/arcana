@@ -34,9 +34,10 @@ export const parseCard = (value: number): Card => {
 
 export const cardLabel = (card: Card) => `${card.rankLabel}${card.suitLabel}`;
 
-/** Unmask a hole card: card_raw = masked_value XOR player_mask */
+/** Unmask a hole card: card_raw = (masked_value - mask) wrapping mod 2^64 */
 export const unmaskCard = (maskedValue: bigint, mask: bigint): number => {
-  return Number(maskedValue ^ mask) & 0xff;
+  const MASK64 = 0xffff_ffff_ffff_ffffn;
+  return Number((maskedValue - mask + (1n << 64n)) & MASK64) & 0xff;
 };
 
 // ── Hand name display ─────────────────────────────────────────────────────────

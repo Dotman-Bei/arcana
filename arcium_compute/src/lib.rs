@@ -97,11 +97,13 @@ mod circuits {
         oblivious_swap_8(&mut deck, j8 + 8);
 
         // ── Mask hole cards, leave community cards plain ───────────────────────
+        // XOR is unsupported in arcis circuits; use wrapping_add (additive OTP).
+        // The on-chain reveal uses wrapping_sub to recover the plaintext card.
         [
-            deck[0] ^ inp.p1_mask,
-            deck[1] ^ inp.p1_mask,
-            deck[2] ^ inp.p2_mask,
-            deck[3] ^ inp.p2_mask,
+            deck[0].wrapping_add(inp.p1_mask),
+            deck[1].wrapping_add(inp.p1_mask),
+            deck[2].wrapping_add(inp.p2_mask),
+            deck[3].wrapping_add(inp.p2_mask),
             deck[4],
             deck[5],
             deck[6],
