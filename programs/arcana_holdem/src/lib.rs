@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use arcium_anchor::prelude::*;
+use arcium_client::idl::arcium::types::CircuitSource;
 
 pub mod errors;
 pub mod instructions;
@@ -121,11 +122,11 @@ pub mod arcana_holdem {
     /// Arcium callback — invoked by the MXE after deal_cards completes.
     /// Stores masked hole cards and community cards on the Table PDA.
     #[arcium_callback(encrypted_ix = "deal_cards")]
-    pub fn deal_callback(
+    pub fn deal_cards_callback(
         ctx: Context<DealCardsCallback>,
         output: SignedComputationOutputs<DealCallbackOutput>,
     ) -> Result<()> {
-        instructions::deal_callback(ctx, output)
+        instructions::deal_cards_callback(ctx, output)
     }
 
     /// A player acts: Fold, Check, Call, or Raise.

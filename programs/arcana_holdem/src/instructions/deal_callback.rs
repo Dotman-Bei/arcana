@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use arcium_anchor::prelude::*;
 
-use crate::{CardsDealt, HoldemError, TableState, COMP_DEF_OFFSET_DEAL_CARDS};
+use crate::{CardsDealt, HoldemError, Table, TableState, ID, ID_CONST, COMP_DEF_OFFSET_DEAL_CARDS};
 
 /// Output from the deal_cards garbled circuit: [u64; 9]
 ///   [0..1] = player_a masked hole cards
@@ -36,7 +36,7 @@ pub struct DealCardsCallback<'info> {
     pub table: Account<'info, Table>,
 }
 
-pub fn deal_callback(
+pub fn deal_cards_callback(
     ctx: Context<DealCardsCallback>,
     output: SignedComputationOutputs<DealCallbackOutput>,
 ) -> Result<()> {
