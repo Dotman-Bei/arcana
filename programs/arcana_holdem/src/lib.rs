@@ -6,12 +6,12 @@ pub mod instructions;
 
 pub use errors::*;
 pub use instructions::{
-    CloseTable, DealCallback, DealCallbackOutput, InitTable, JoinTable,
+    CloseTable, DealCallbackOutput, DealCardsCallback, InitTable, JoinTable,
     RevealShowdown, SubmitAction,
 };
 pub(crate) use instructions::{
     __client_accounts_close_table,
-    __client_accounts_deal_callback,
+    __client_accounts_deal_cards_callback,
     __client_accounts_init_table,
     __client_accounts_join_table,
     __client_accounts_reveal_showdown,
@@ -74,7 +74,7 @@ pub mod arcana_holdem {
     /// `arcis_url` is the public URL of the compiled deal_cards.arcis circuit file
     /// (uploaded to Supabase or another public host after `anchor build`).
     pub fn init_deal_cards_comp_def(ctx: Context<InitDealCardsCompDef>, arcis_url: String) -> Result<()> {
-        init_comp_def(ctx.accounts, Some(arcis_url), None)?;
+        init_comp_def(ctx.accounts, Some(CircuitSource::Url(arcis_url)), None)?;
         Ok(())
     }
 
@@ -252,8 +252,4 @@ pub struct InitDealCardsCompDef<'info> {
     pub system_program: Program<'info, System>,
 }
 
-/// Dummy signer PDA required by the Arcium queue_computation call.
-#[account]
-pub struct ArciumSignerAccount {
-    pub bump: u8,
-}
+// ArciumSignerAccount is generated automatically by the #[arcium_program] macro.

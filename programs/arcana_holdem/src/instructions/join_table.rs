@@ -4,8 +4,8 @@ use arcium_anchor::prelude::*;
 use arcium_client::idl::arcium::types::CallbackAccount;
 
 use crate::{
-    ArciumSignerAccount, DealCallback, HoldemError, Table, TableState,
-    COMP_DEF_OFFSET_DEAL_CARDS, ID, ID_CONST, TABLE_SEED,
+    ArciumSignerAccount, DealCardsCallback, HoldemError, Table, TableState,
+    COMP_DEF_OFFSET_DEAL_CARDS, TABLE_SEED,
 };
 
 /// Player B joins the table and immediately triggers the Arcium MXE deal.
@@ -88,7 +88,7 @@ pub fn join_table(
     ctx.accounts.sign_pda_account.bump = ctx.bumps.sign_pda_account;
 
     let table_key = ctx.accounts.table.key();
-    let callback_ixs = vec![DealCallback::callback_ix(
+    let callback_ixs = vec![DealCardsCallback::callback_ix(
         computation_offset,
         &ctx.accounts.mxe_account,
         &[CallbackAccount { pubkey: table_key, is_writable: true }],

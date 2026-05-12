@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::keccak;
+use anchor_lang::solana_program::hash;
 
 use crate::{GameSettled, HoldemError, Table, TableState, TABLE_SEED};
 
@@ -37,7 +37,7 @@ pub fn reveal_showdown(ctx: Context<RevealShowdown>, mask: u64) -> Result<()> {
     let mut preimage = [0u8; 40];
     preimage[..8].copy_from_slice(&mask.to_le_bytes());
     preimage[8..].copy_from_slice(&table_key.to_bytes());
-    let hash = keccak::hash(&preimage);
+    let hash = hash::hash(&preimage);
 
     if is_a {
         require!(hash.0 == ctx.accounts.table.player_a_mask_commit, HoldemError::InvalidMaskReveal);

@@ -1,4 +1,4 @@
-# Arcana Hold'em — Arcium MXE Integration
+# Arcana — Arcium MXE Integration
 
 ## What is this?
 

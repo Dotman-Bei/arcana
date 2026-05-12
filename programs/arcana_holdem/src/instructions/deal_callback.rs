@@ -1,22 +1,26 @@
 use anchor_lang::prelude::*;
 use arcium_anchor::prelude::*;
 
-use crate::{
-    CardsDealt, HoldemError, Table, TableState, COMP_DEF_OFFSET_DEAL_CARDS, ID, ID_CONST,
-};
+use crate::{CardsDealt, HoldemError, Table, TableState, COMP_DEF_OFFSET_DEAL_CARDS};
 
-/// DealCallbackOutput corresponds to the `[u64; 9]` returned by deal_cards:
-///   field_0[0..1] = player_a masked hole cards
-///   field_0[2..3] = player_b masked hole cards
-///   field_0[4..8] = community cards (0-51)
+/// Output from the deal_cards garbled circuit: [u64; 9]
+///   [0..1] = player_a masked hole cards
+///   [2..3] = player_b masked hole cards
+///   [4..8] = community cards (0-51 cast to u64)
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct DealCallbackOutput {
     pub field_0: [u64; 9],
 }
 
+impl arcium_anchor::HasSize for DealCallbackOutput {
+    const SIZE: usize = 9 * 8; // 9 × u64 = 72 bytes
+}
+
+/// Arcium requires the callback accounts struct to be named
+/// `<PascalCase(instruction_name)>Callback` → `DealCardsCallback`.
 #[callback_accounts("deal_cards")]
 #[derive(Accounts)]
-pub struct DealCallback<'info> {
+pub struct DealCardsCallback<'info> {
     pub arcium_program: Program<'info, Arcium>,
     #[account(address = derive_comp_def_pda!(COMP_DEF_OFFSET_DEAL_CARDS))]
     pub comp_def_account: Account<'info, ComputationDefinitionAccount>,
@@ -33,7 +37,7 @@ pub struct DealCallback<'info> {
 }
 
 pub fn deal_callback(
-    ctx: Context<DealCallback>,
+    ctx: Context<DealCardsCallback>,
     output: SignedComputationOutputs<DealCallbackOutput>,
 ) -> Result<()> {
     let cards = match output.verify_output(
@@ -49,20 +53,17 @@ pub fn deal_callback(
 
     require!(table.state == TableState::Dealing, HoldemError::InvalidState);
 
-    // Store masked hole cards.
     table.player_a_card1 = cards[0];
     table.player_a_card2 = cards[1];
     table.player_b_card1 = cards[2];
     table.player_b_card2 = cards[3];
 
-    // Store all 5 community cards (cast u64 back to u8; values are 0-51).
     table.community[0] = cards[4] as u8;
     table.community[1] = cards[5] as u8;
     table.community[2] = cards[6] as u8;
     table.community[3] = cards[7] as u8;
     table.community[4] = cards[8] as u8;
 
-    // Cards dealt — move to pre-flop betting.
     table.state = TableState::PreFlop;
 
     emit!(CardsDealt { table: table_key });

@@ -1,4 +1,4 @@
-# Arcana Hold'em
+# Arcana
 
 Provably fair Texas Hold'em on Solana. Hole cards are dealt privately via the **Arcium MXE** garbled circuit — nobody sees your cards, not even the blockchain.
 
