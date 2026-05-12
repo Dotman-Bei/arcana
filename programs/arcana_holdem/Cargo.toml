@@ -21,3 +21,4 @@ anchor-lang = { workspace = true }
 arcium-anchor = { workspace = true }
 arcium-macros = { workspace = true }
 arcium-client = { workspace = true }
+sha2 = { version = "0.10", default-features = false }

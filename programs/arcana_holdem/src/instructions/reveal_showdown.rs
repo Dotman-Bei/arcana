@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::hash;
+use sha2::{Digest, Sha256};
 
 use crate::{GameSettled, HoldemError, Table, TableState, TABLE_SEED};
 
@@ -37,15 +37,15 @@ pub fn reveal_showdown(ctx: Context<RevealShowdown>, mask: u64) -> Result<()> {
     let mut preimage = [0u8; 40];
     preimage[..8].copy_from_slice(&mask.to_le_bytes());
     preimage[8..].copy_from_slice(&table_key.to_bytes());
-    let hash = hash::hash(&preimage);
+    let hash_bytes: [u8; 32] = Sha256::digest(&preimage).into();
 
     if is_a {
-        require!(hash.0 == ctx.accounts.table.player_a_mask_commit, HoldemError::InvalidMaskReveal);
+        require!(hash_bytes == ctx.accounts.table.player_a_mask_commit, HoldemError::InvalidMaskReveal);
         ctx.accounts.table.player_a_card1 ^= mask;
         ctx.accounts.table.player_a_card2 ^= mask;
         ctx.accounts.table.player_a_mask_commit = [0u8; 32]; // signal: A has revealed
     } else {
-        require!(hash.0 == ctx.accounts.table.player_b_mask_commit, HoldemError::InvalidMaskReveal);
+        require!(hash_bytes == ctx.accounts.table.player_b_mask_commit, HoldemError::InvalidMaskReveal);
         ctx.accounts.table.player_b_card1 ^= mask;
         ctx.accounts.table.player_b_card2 ^= mask;
         ctx.accounts.table.player_b_mask_commit = [0u8; 32]; // signal: B has revealed
