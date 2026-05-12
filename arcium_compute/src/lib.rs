@@ -44,11 +44,8 @@ mod circuits {
         let inp = input.to_arcis();
 
         // ── LCG-based deck shuffle ─────────────────────────────────────────────
-        // We use a 52-element deck represented as an array of indices 0-51.
-        // The Fisher-Yates shuffle is performed using oblivious conditional swaps
-        // implemented through exhaustive if-equality checks — each swap inspects
-        // all 52 positions to obliviously select the target without leaking the
-        // random index. We only shuffle the first 9 positions (4 hole + 5 community).
+        // Fisher-Yates on the first 9 positions using oblivious conditional swaps.
+        // Each oblivious_swap_N is fully unrolled so the circuit topology is fixed.
 
         let mut deck = [
              0u64,  1,  2,  3,  4,  5,  6,  7,  8,  9,
@@ -59,13 +56,9 @@ mod circuits {
             50, 51,
         ];
 
-        // LCG constants (Knuth MMIX): multiplier and increment.
+        // LCG constants (Knuth MMIX)
         const A: u64 = 6_364_136_223_846_793_005;
         const C: u64 = 1_442_695_040_888_963_407;
-
-        // Macro-style inlining: generate 9 LCG steps and oblivious swaps.
-        // Each swap(deck, i, j) where j is data-dependent uses a linear scan
-        // over all 52 positions to obliviously select and exchange elements.
 
         let r0 = inp.seed.wrapping_mul(A).wrapping_add(C);
         let j0 = (r0 >> 33) % 52u64;
@@ -73,7 +66,7 @@ mod circuits {
 
         let r1 = r0.wrapping_mul(A).wrapping_add(C);
         let j1 = (r1 >> 33) % 51u64;
-        oblivious_swap_1(&mut deck, j1);
+        oblivious_swap_1(&mut deck, j1 + 1);
 
         let r2 = r1.wrapping_mul(A).wrapping_add(C);
         let j2 = (r2 >> 33) % 50u64;
@@ -120,124 +113,466 @@ mod circuits {
 
     // ── Oblivious swap helpers ────────────────────────────────────────────────
     //
-    // Each function swaps deck[position] with deck[j] where j is a runtime value.
-    // The scan over all valid target positions ensures the circuit topology is
-    // data-independent — required for garbled circuit privacy.
+    // Each function swaps deck[N] with deck[j] where j is a secret runtime value.
+    // Fully unrolled — no loops — so the garbled circuit topology is data-independent.
+    // j == N is a no-op (swap with self); handled implicitly by the else branch.
 
     fn oblivious_swap_0(deck: &mut [u64; 52], j: u64) {
-        let d0 = deck[0];
-        let mut k = 0usize;
-        while k < 52 {
-            let dk = deck[k];
-            if j == k as u64 {
-                deck[0] = dk;
-                deck[k] = d0;
-            }
-            k += 1;
-        }
+        let d = deck[0];
+        if j == 1  { let t = deck[1];  deck[0] = t; deck[1]  = d; }
+        if j == 2  { let t = deck[2];  deck[0] = t; deck[2]  = d; }
+        if j == 3  { let t = deck[3];  deck[0] = t; deck[3]  = d; }
+        if j == 4  { let t = deck[4];  deck[0] = t; deck[4]  = d; }
+        if j == 5  { let t = deck[5];  deck[0] = t; deck[5]  = d; }
+        if j == 6  { let t = deck[6];  deck[0] = t; deck[6]  = d; }
+        if j == 7  { let t = deck[7];  deck[0] = t; deck[7]  = d; }
+        if j == 8  { let t = deck[8];  deck[0] = t; deck[8]  = d; }
+        if j == 9  { let t = deck[9];  deck[0] = t; deck[9]  = d; }
+        if j == 10 { let t = deck[10]; deck[0] = t; deck[10] = d; }
+        if j == 11 { let t = deck[11]; deck[0] = t; deck[11] = d; }
+        if j == 12 { let t = deck[12]; deck[0] = t; deck[12] = d; }
+        if j == 13 { let t = deck[13]; deck[0] = t; deck[13] = d; }
+        if j == 14 { let t = deck[14]; deck[0] = t; deck[14] = d; }
+        if j == 15 { let t = deck[15]; deck[0] = t; deck[15] = d; }
+        if j == 16 { let t = deck[16]; deck[0] = t; deck[16] = d; }
+        if j == 17 { let t = deck[17]; deck[0] = t; deck[17] = d; }
+        if j == 18 { let t = deck[18]; deck[0] = t; deck[18] = d; }
+        if j == 19 { let t = deck[19]; deck[0] = t; deck[19] = d; }
+        if j == 20 { let t = deck[20]; deck[0] = t; deck[20] = d; }
+        if j == 21 { let t = deck[21]; deck[0] = t; deck[21] = d; }
+        if j == 22 { let t = deck[22]; deck[0] = t; deck[22] = d; }
+        if j == 23 { let t = deck[23]; deck[0] = t; deck[23] = d; }
+        if j == 24 { let t = deck[24]; deck[0] = t; deck[24] = d; }
+        if j == 25 { let t = deck[25]; deck[0] = t; deck[25] = d; }
+        if j == 26 { let t = deck[26]; deck[0] = t; deck[26] = d; }
+        if j == 27 { let t = deck[27]; deck[0] = t; deck[27] = d; }
+        if j == 28 { let t = deck[28]; deck[0] = t; deck[28] = d; }
+        if j == 29 { let t = deck[29]; deck[0] = t; deck[29] = d; }
+        if j == 30 { let t = deck[30]; deck[0] = t; deck[30] = d; }
+        if j == 31 { let t = deck[31]; deck[0] = t; deck[31] = d; }
+        if j == 32 { let t = deck[32]; deck[0] = t; deck[32] = d; }
+        if j == 33 { let t = deck[33]; deck[0] = t; deck[33] = d; }
+        if j == 34 { let t = deck[34]; deck[0] = t; deck[34] = d; }
+        if j == 35 { let t = deck[35]; deck[0] = t; deck[35] = d; }
+        if j == 36 { let t = deck[36]; deck[0] = t; deck[36] = d; }
+        if j == 37 { let t = deck[37]; deck[0] = t; deck[37] = d; }
+        if j == 38 { let t = deck[38]; deck[0] = t; deck[38] = d; }
+        if j == 39 { let t = deck[39]; deck[0] = t; deck[39] = d; }
+        if j == 40 { let t = deck[40]; deck[0] = t; deck[40] = d; }
+        if j == 41 { let t = deck[41]; deck[0] = t; deck[41] = d; }
+        if j == 42 { let t = deck[42]; deck[0] = t; deck[42] = d; }
+        if j == 43 { let t = deck[43]; deck[0] = t; deck[43] = d; }
+        if j == 44 { let t = deck[44]; deck[0] = t; deck[44] = d; }
+        if j == 45 { let t = deck[45]; deck[0] = t; deck[45] = d; }
+        if j == 46 { let t = deck[46]; deck[0] = t; deck[46] = d; }
+        if j == 47 { let t = deck[47]; deck[0] = t; deck[47] = d; }
+        if j == 48 { let t = deck[48]; deck[0] = t; deck[48] = d; }
+        if j == 49 { let t = deck[49]; deck[0] = t; deck[49] = d; }
+        if j == 50 { let t = deck[50]; deck[0] = t; deck[50] = d; }
+        if j == 51 { let t = deck[51]; deck[0] = t; deck[51] = d; }
     }
 
     fn oblivious_swap_1(deck: &mut [u64; 52], j: u64) {
-        let d1 = deck[1];
-        let mut k = 1usize;
-        while k < 52 {
-            let dk = deck[k];
-            if j == k as u64 {
-                deck[1] = dk;
-                deck[k] = d1;
-            }
-            k += 1;
-        }
+        let d = deck[1];
+        if j == 2  { let t = deck[2];  deck[1] = t; deck[2]  = d; }
+        if j == 3  { let t = deck[3];  deck[1] = t; deck[3]  = d; }
+        if j == 4  { let t = deck[4];  deck[1] = t; deck[4]  = d; }
+        if j == 5  { let t = deck[5];  deck[1] = t; deck[5]  = d; }
+        if j == 6  { let t = deck[6];  deck[1] = t; deck[6]  = d; }
+        if j == 7  { let t = deck[7];  deck[1] = t; deck[7]  = d; }
+        if j == 8  { let t = deck[8];  deck[1] = t; deck[8]  = d; }
+        if j == 9  { let t = deck[9];  deck[1] = t; deck[9]  = d; }
+        if j == 10 { let t = deck[10]; deck[1] = t; deck[10] = d; }
+        if j == 11 { let t = deck[11]; deck[1] = t; deck[11] = d; }
+        if j == 12 { let t = deck[12]; deck[1] = t; deck[12] = d; }
+        if j == 13 { let t = deck[13]; deck[1] = t; deck[13] = d; }
+        if j == 14 { let t = deck[14]; deck[1] = t; deck[14] = d; }
+        if j == 15 { let t = deck[15]; deck[1] = t; deck[15] = d; }
+        if j == 16 { let t = deck[16]; deck[1] = t; deck[16] = d; }
+        if j == 17 { let t = deck[17]; deck[1] = t; deck[17] = d; }
+        if j == 18 { let t = deck[18]; deck[1] = t; deck[18] = d; }
+        if j == 19 { let t = deck[19]; deck[1] = t; deck[19] = d; }
+        if j == 20 { let t = deck[20]; deck[1] = t; deck[20] = d; }
+        if j == 21 { let t = deck[21]; deck[1] = t; deck[21] = d; }
+        if j == 22 { let t = deck[22]; deck[1] = t; deck[22] = d; }
+        if j == 23 { let t = deck[23]; deck[1] = t; deck[23] = d; }
+        if j == 24 { let t = deck[24]; deck[1] = t; deck[24] = d; }
+        if j == 25 { let t = deck[25]; deck[1] = t; deck[25] = d; }
+        if j == 26 { let t = deck[26]; deck[1] = t; deck[26] = d; }
+        if j == 27 { let t = deck[27]; deck[1] = t; deck[27] = d; }
+        if j == 28 { let t = deck[28]; deck[1] = t; deck[28] = d; }
+        if j == 29 { let t = deck[29]; deck[1] = t; deck[29] = d; }
+        if j == 30 { let t = deck[30]; deck[1] = t; deck[30] = d; }
+        if j == 31 { let t = deck[31]; deck[1] = t; deck[31] = d; }
+        if j == 32 { let t = deck[32]; deck[1] = t; deck[32] = d; }
+        if j == 33 { let t = deck[33]; deck[1] = t; deck[33] = d; }
+        if j == 34 { let t = deck[34]; deck[1] = t; deck[34] = d; }
+        if j == 35 { let t = deck[35]; deck[1] = t; deck[35] = d; }
+        if j == 36 { let t = deck[36]; deck[1] = t; deck[36] = d; }
+        if j == 37 { let t = deck[37]; deck[1] = t; deck[37] = d; }
+        if j == 38 { let t = deck[38]; deck[1] = t; deck[38] = d; }
+        if j == 39 { let t = deck[39]; deck[1] = t; deck[39] = d; }
+        if j == 40 { let t = deck[40]; deck[1] = t; deck[40] = d; }
+        if j == 41 { let t = deck[41]; deck[1] = t; deck[41] = d; }
+        if j == 42 { let t = deck[42]; deck[1] = t; deck[42] = d; }
+        if j == 43 { let t = deck[43]; deck[1] = t; deck[43] = d; }
+        if j == 44 { let t = deck[44]; deck[1] = t; deck[44] = d; }
+        if j == 45 { let t = deck[45]; deck[1] = t; deck[45] = d; }
+        if j == 46 { let t = deck[46]; deck[1] = t; deck[46] = d; }
+        if j == 47 { let t = deck[47]; deck[1] = t; deck[47] = d; }
+        if j == 48 { let t = deck[48]; deck[1] = t; deck[48] = d; }
+        if j == 49 { let t = deck[49]; deck[1] = t; deck[49] = d; }
+        if j == 50 { let t = deck[50]; deck[1] = t; deck[50] = d; }
+        if j == 51 { let t = deck[51]; deck[1] = t; deck[51] = d; }
     }
 
     fn oblivious_swap_2(deck: &mut [u64; 52], j: u64) {
-        let d2 = deck[2];
-        let mut k = 2usize;
-        while k < 52 {
-            let dk = deck[k];
-            if j == k as u64 {
-                deck[2] = dk;
-                deck[k] = d2;
-            }
-            k += 1;
-        }
+        let d = deck[2];
+        if j == 3  { let t = deck[3];  deck[2] = t; deck[3]  = d; }
+        if j == 4  { let t = deck[4];  deck[2] = t; deck[4]  = d; }
+        if j == 5  { let t = deck[5];  deck[2] = t; deck[5]  = d; }
+        if j == 6  { let t = deck[6];  deck[2] = t; deck[6]  = d; }
+        if j == 7  { let t = deck[7];  deck[2] = t; deck[7]  = d; }
+        if j == 8  { let t = deck[8];  deck[2] = t; deck[8]  = d; }
+        if j == 9  { let t = deck[9];  deck[2] = t; deck[9]  = d; }
+        if j == 10 { let t = deck[10]; deck[2] = t; deck[10] = d; }
+        if j == 11 { let t = deck[11]; deck[2] = t; deck[11] = d; }
+        if j == 12 { let t = deck[12]; deck[2] = t; deck[12] = d; }
+        if j == 13 { let t = deck[13]; deck[2] = t; deck[13] = d; }
+        if j == 14 { let t = deck[14]; deck[2] = t; deck[14] = d; }
+        if j == 15 { let t = deck[15]; deck[2] = t; deck[15] = d; }
+        if j == 16 { let t = deck[16]; deck[2] = t; deck[16] = d; }
+        if j == 17 { let t = deck[17]; deck[2] = t; deck[17] = d; }
+        if j == 18 { let t = deck[18]; deck[2] = t; deck[18] = d; }
+        if j == 19 { let t = deck[19]; deck[2] = t; deck[19] = d; }
+        if j == 20 { let t = deck[20]; deck[2] = t; deck[20] = d; }
+        if j == 21 { let t = deck[21]; deck[2] = t; deck[21] = d; }
+        if j == 22 { let t = deck[22]; deck[2] = t; deck[22] = d; }
+        if j == 23 { let t = deck[23]; deck[2] = t; deck[23] = d; }
+        if j == 24 { let t = deck[24]; deck[2] = t; deck[24] = d; }
+        if j == 25 { let t = deck[25]; deck[2] = t; deck[25] = d; }
+        if j == 26 { let t = deck[26]; deck[2] = t; deck[26] = d; }
+        if j == 27 { let t = deck[27]; deck[2] = t; deck[27] = d; }
+        if j == 28 { let t = deck[28]; deck[2] = t; deck[28] = d; }
+        if j == 29 { let t = deck[29]; deck[2] = t; deck[29] = d; }
+        if j == 30 { let t = deck[30]; deck[2] = t; deck[30] = d; }
+        if j == 31 { let t = deck[31]; deck[2] = t; deck[31] = d; }
+        if j == 32 { let t = deck[32]; deck[2] = t; deck[32] = d; }
+        if j == 33 { let t = deck[33]; deck[2] = t; deck[33] = d; }
+        if j == 34 { let t = deck[34]; deck[2] = t; deck[34] = d; }
+        if j == 35 { let t = deck[35]; deck[2] = t; deck[35] = d; }
+        if j == 36 { let t = deck[36]; deck[2] = t; deck[36] = d; }
+        if j == 37 { let t = deck[37]; deck[2] = t; deck[37] = d; }
+        if j == 38 { let t = deck[38]; deck[2] = t; deck[38] = d; }
+        if j == 39 { let t = deck[39]; deck[2] = t; deck[39] = d; }
+        if j == 40 { let t = deck[40]; deck[2] = t; deck[40] = d; }
+        if j == 41 { let t = deck[41]; deck[2] = t; deck[41] = d; }
+        if j == 42 { let t = deck[42]; deck[2] = t; deck[42] = d; }
+        if j == 43 { let t = deck[43]; deck[2] = t; deck[43] = d; }
+        if j == 44 { let t = deck[44]; deck[2] = t; deck[44] = d; }
+        if j == 45 { let t = deck[45]; deck[2] = t; deck[45] = d; }
+        if j == 46 { let t = deck[46]; deck[2] = t; deck[46] = d; }
+        if j == 47 { let t = deck[47]; deck[2] = t; deck[47] = d; }
+        if j == 48 { let t = deck[48]; deck[2] = t; deck[48] = d; }
+        if j == 49 { let t = deck[49]; deck[2] = t; deck[49] = d; }
+        if j == 50 { let t = deck[50]; deck[2] = t; deck[50] = d; }
+        if j == 51 { let t = deck[51]; deck[2] = t; deck[51] = d; }
     }
 
     fn oblivious_swap_3(deck: &mut [u64; 52], j: u64) {
-        let d3 = deck[3];
-        let mut k = 3usize;
-        while k < 52 {
-            let dk = deck[k];
-            if j == k as u64 {
-                deck[3] = dk;
-                deck[k] = d3;
-            }
-            k += 1;
-        }
+        let d = deck[3];
+        if j == 4  { let t = deck[4];  deck[3] = t; deck[4]  = d; }
+        if j == 5  { let t = deck[5];  deck[3] = t; deck[5]  = d; }
+        if j == 6  { let t = deck[6];  deck[3] = t; deck[6]  = d; }
+        if j == 7  { let t = deck[7];  deck[3] = t; deck[7]  = d; }
+        if j == 8  { let t = deck[8];  deck[3] = t; deck[8]  = d; }
+        if j == 9  { let t = deck[9];  deck[3] = t; deck[9]  = d; }
+        if j == 10 { let t = deck[10]; deck[3] = t; deck[10] = d; }
+        if j == 11 { let t = deck[11]; deck[3] = t; deck[11] = d; }
+        if j == 12 { let t = deck[12]; deck[3] = t; deck[12] = d; }
+        if j == 13 { let t = deck[13]; deck[3] = t; deck[13] = d; }
+        if j == 14 { let t = deck[14]; deck[3] = t; deck[14] = d; }
+        if j == 15 { let t = deck[15]; deck[3] = t; deck[15] = d; }
+        if j == 16 { let t = deck[16]; deck[3] = t; deck[16] = d; }
+        if j == 17 { let t = deck[17]; deck[3] = t; deck[17] = d; }
+        if j == 18 { let t = deck[18]; deck[3] = t; deck[18] = d; }
+        if j == 19 { let t = deck[19]; deck[3] = t; deck[19] = d; }
+        if j == 20 { let t = deck[20]; deck[3] = t; deck[20] = d; }
+        if j == 21 { let t = deck[21]; deck[3] = t; deck[21] = d; }
+        if j == 22 { let t = deck[22]; deck[3] = t; deck[22] = d; }
+        if j == 23 { let t = deck[23]; deck[3] = t; deck[23] = d; }
+        if j == 24 { let t = deck[24]; deck[3] = t; deck[24] = d; }
+        if j == 25 { let t = deck[25]; deck[3] = t; deck[25] = d; }
+        if j == 26 { let t = deck[26]; deck[3] = t; deck[26] = d; }
+        if j == 27 { let t = deck[27]; deck[3] = t; deck[27] = d; }
+        if j == 28 { let t = deck[28]; deck[3] = t; deck[28] = d; }
+        if j == 29 { let t = deck[29]; deck[3] = t; deck[29] = d; }
+        if j == 30 { let t = deck[30]; deck[3] = t; deck[30] = d; }
+        if j == 31 { let t = deck[31]; deck[3] = t; deck[31] = d; }
+        if j == 32 { let t = deck[32]; deck[3] = t; deck[32] = d; }
+        if j == 33 { let t = deck[33]; deck[3] = t; deck[33] = d; }
+        if j == 34 { let t = deck[34]; deck[3] = t; deck[34] = d; }
+        if j == 35 { let t = deck[35]; deck[3] = t; deck[35] = d; }
+        if j == 36 { let t = deck[36]; deck[3] = t; deck[36] = d; }
+        if j == 37 { let t = deck[37]; deck[3] = t; deck[37] = d; }
+        if j == 38 { let t = deck[38]; deck[3] = t; deck[38] = d; }
+        if j == 39 { let t = deck[39]; deck[3] = t; deck[39] = d; }
+        if j == 40 { let t = deck[40]; deck[3] = t; deck[40] = d; }
+        if j == 41 { let t = deck[41]; deck[3] = t; deck[41] = d; }
+        if j == 42 { let t = deck[42]; deck[3] = t; deck[42] = d; }
+        if j == 43 { let t = deck[43]; deck[3] = t; deck[43] = d; }
+        if j == 44 { let t = deck[44]; deck[3] = t; deck[44] = d; }
+        if j == 45 { let t = deck[45]; deck[3] = t; deck[45] = d; }
+        if j == 46 { let t = deck[46]; deck[3] = t; deck[46] = d; }
+        if j == 47 { let t = deck[47]; deck[3] = t; deck[47] = d; }
+        if j == 48 { let t = deck[48]; deck[3] = t; deck[48] = d; }
+        if j == 49 { let t = deck[49]; deck[3] = t; deck[49] = d; }
+        if j == 50 { let t = deck[50]; deck[3] = t; deck[50] = d; }
+        if j == 51 { let t = deck[51]; deck[3] = t; deck[51] = d; }
     }
 
     fn oblivious_swap_4(deck: &mut [u64; 52], j: u64) {
-        let d4 = deck[4];
-        let mut k = 4usize;
-        while k < 52 {
-            let dk = deck[k];
-            if j == k as u64 {
-                deck[4] = dk;
-                deck[k] = d4;
-            }
-            k += 1;
-        }
+        let d = deck[4];
+        if j == 5  { let t = deck[5];  deck[4] = t; deck[5]  = d; }
+        if j == 6  { let t = deck[6];  deck[4] = t; deck[6]  = d; }
+        if j == 7  { let t = deck[7];  deck[4] = t; deck[7]  = d; }
+        if j == 8  { let t = deck[8];  deck[4] = t; deck[8]  = d; }
+        if j == 9  { let t = deck[9];  deck[4] = t; deck[9]  = d; }
+        if j == 10 { let t = deck[10]; deck[4] = t; deck[10] = d; }
+        if j == 11 { let t = deck[11]; deck[4] = t; deck[11] = d; }
+        if j == 12 { let t = deck[12]; deck[4] = t; deck[12] = d; }
+        if j == 13 { let t = deck[13]; deck[4] = t; deck[13] = d; }
+        if j == 14 { let t = deck[14]; deck[4] = t; deck[14] = d; }
+        if j == 15 { let t = deck[15]; deck[4] = t; deck[15] = d; }
+        if j == 16 { let t = deck[16]; deck[4] = t; deck[16] = d; }
+        if j == 17 { let t = deck[17]; deck[4] = t; deck[17] = d; }
+        if j == 18 { let t = deck[18]; deck[4] = t; deck[18] = d; }
+        if j == 19 { let t = deck[19]; deck[4] = t; deck[19] = d; }
+        if j == 20 { let t = deck[20]; deck[4] = t; deck[20] = d; }
+        if j == 21 { let t = deck[21]; deck[4] = t; deck[21] = d; }
+        if j == 22 { let t = deck[22]; deck[4] = t; deck[22] = d; }
+        if j == 23 { let t = deck[23]; deck[4] = t; deck[23] = d; }
+        if j == 24 { let t = deck[24]; deck[4] = t; deck[24] = d; }
+        if j == 25 { let t = deck[25]; deck[4] = t; deck[25] = d; }
+        if j == 26 { let t = deck[26]; deck[4] = t; deck[26] = d; }
+        if j == 27 { let t = deck[27]; deck[4] = t; deck[27] = d; }
+        if j == 28 { let t = deck[28]; deck[4] = t; deck[28] = d; }
+        if j == 29 { let t = deck[29]; deck[4] = t; deck[29] = d; }
+        if j == 30 { let t = deck[30]; deck[4] = t; deck[30] = d; }
+        if j == 31 { let t = deck[31]; deck[4] = t; deck[31] = d; }
+        if j == 32 { let t = deck[32]; deck[4] = t; deck[32] = d; }
+        if j == 33 { let t = deck[33]; deck[4] = t; deck[33] = d; }
+        if j == 34 { let t = deck[34]; deck[4] = t; deck[34] = d; }
+        if j == 35 { let t = deck[35]; deck[4] = t; deck[35] = d; }
+        if j == 36 { let t = deck[36]; deck[4] = t; deck[36] = d; }
+        if j == 37 { let t = deck[37]; deck[4] = t; deck[37] = d; }
+        if j == 38 { let t = deck[38]; deck[4] = t; deck[38] = d; }
+        if j == 39 { let t = deck[39]; deck[4] = t; deck[39] = d; }
+        if j == 40 { let t = deck[40]; deck[4] = t; deck[40] = d; }
+        if j == 41 { let t = deck[41]; deck[4] = t; deck[41] = d; }
+        if j == 42 { let t = deck[42]; deck[4] = t; deck[42] = d; }
+        if j == 43 { let t = deck[43]; deck[4] = t; deck[43] = d; }
+        if j == 44 { let t = deck[44]; deck[4] = t; deck[44] = d; }
+        if j == 45 { let t = deck[45]; deck[4] = t; deck[45] = d; }
+        if j == 46 { let t = deck[46]; deck[4] = t; deck[46] = d; }
+        if j == 47 { let t = deck[47]; deck[4] = t; deck[47] = d; }
+        if j == 48 { let t = deck[48]; deck[4] = t; deck[48] = d; }
+        if j == 49 { let t = deck[49]; deck[4] = t; deck[49] = d; }
+        if j == 50 { let t = deck[50]; deck[4] = t; deck[50] = d; }
+        if j == 51 { let t = deck[51]; deck[4] = t; deck[51] = d; }
     }
 
     fn oblivious_swap_5(deck: &mut [u64; 52], j: u64) {
-        let d5 = deck[5];
-        let mut k = 5usize;
-        while k < 52 {
-            let dk = deck[k];
-            if j == k as u64 {
-                deck[5] = dk;
-                deck[k] = d5;
-            }
-            k += 1;
-        }
+        let d = deck[5];
+        if j == 6  { let t = deck[6];  deck[5] = t; deck[6]  = d; }
+        if j == 7  { let t = deck[7];  deck[5] = t; deck[7]  = d; }
+        if j == 8  { let t = deck[8];  deck[5] = t; deck[8]  = d; }
+        if j == 9  { let t = deck[9];  deck[5] = t; deck[9]  = d; }
+        if j == 10 { let t = deck[10]; deck[5] = t; deck[10] = d; }
+        if j == 11 { let t = deck[11]; deck[5] = t; deck[11] = d; }
+        if j == 12 { let t = deck[12]; deck[5] = t; deck[12] = d; }
+        if j == 13 { let t = deck[13]; deck[5] = t; deck[13] = d; }
+        if j == 14 { let t = deck[14]; deck[5] = t; deck[14] = d; }
+        if j == 15 { let t = deck[15]; deck[5] = t; deck[15] = d; }
+        if j == 16 { let t = deck[16]; deck[5] = t; deck[16] = d; }
+        if j == 17 { let t = deck[17]; deck[5] = t; deck[17] = d; }
+        if j == 18 { let t = deck[18]; deck[5] = t; deck[18] = d; }
+        if j == 19 { let t = deck[19]; deck[5] = t; deck[19] = d; }
+        if j == 20 { let t = deck[20]; deck[5] = t; deck[20] = d; }
+        if j == 21 { let t = deck[21]; deck[5] = t; deck[21] = d; }
+        if j == 22 { let t = deck[22]; deck[5] = t; deck[22] = d; }
+        if j == 23 { let t = deck[23]; deck[5] = t; deck[23] = d; }
+        if j == 24 { let t = deck[24]; deck[5] = t; deck[24] = d; }
+        if j == 25 { let t = deck[25]; deck[5] = t; deck[25] = d; }
+        if j == 26 { let t = deck[26]; deck[5] = t; deck[26] = d; }
+        if j == 27 { let t = deck[27]; deck[5] = t; deck[27] = d; }
+        if j == 28 { let t = deck[28]; deck[5] = t; deck[28] = d; }
+        if j == 29 { let t = deck[29]; deck[5] = t; deck[29] = d; }
+        if j == 30 { let t = deck[30]; deck[5] = t; deck[30] = d; }
+        if j == 31 { let t = deck[31]; deck[5] = t; deck[31] = d; }
+        if j == 32 { let t = deck[32]; deck[5] = t; deck[32] = d; }
+        if j == 33 { let t = deck[33]; deck[5] = t; deck[33] = d; }
+        if j == 34 { let t = deck[34]; deck[5] = t; deck[34] = d; }
+        if j == 35 { let t = deck[35]; deck[5] = t; deck[35] = d; }
+        if j == 36 { let t = deck[36]; deck[5] = t; deck[36] = d; }
+        if j == 37 { let t = deck[37]; deck[5] = t; deck[37] = d; }
+        if j == 38 { let t = deck[38]; deck[5] = t; deck[38] = d; }
+        if j == 39 { let t = deck[39]; deck[5] = t; deck[39] = d; }
+        if j == 40 { let t = deck[40]; deck[5] = t; deck[40] = d; }
+        if j == 41 { let t = deck[41]; deck[5] = t; deck[41] = d; }
+        if j == 42 { let t = deck[42]; deck[5] = t; deck[42] = d; }
+        if j == 43 { let t = deck[43]; deck[5] = t; deck[43] = d; }
+        if j == 44 { let t = deck[44]; deck[5] = t; deck[44] = d; }
+        if j == 45 { let t = deck[45]; deck[5] = t; deck[45] = d; }
+        if j == 46 { let t = deck[46]; deck[5] = t; deck[46] = d; }
+        if j == 47 { let t = deck[47]; deck[5] = t; deck[47] = d; }
+        if j == 48 { let t = deck[48]; deck[5] = t; deck[48] = d; }
+        if j == 49 { let t = deck[49]; deck[5] = t; deck[49] = d; }
+        if j == 50 { let t = deck[50]; deck[5] = t; deck[50] = d; }
+        if j == 51 { let t = deck[51]; deck[5] = t; deck[51] = d; }
     }
 
     fn oblivious_swap_6(deck: &mut [u64; 52], j: u64) {
-        let d6 = deck[6];
-        let mut k = 6usize;
-        while k < 52 {
-            let dk = deck[k];
-            if j == k as u64 {
-                deck[6] = dk;
-                deck[k] = d6;
-            }
-            k += 1;
-        }
+        let d = deck[6];
+        if j == 7  { let t = deck[7];  deck[6] = t; deck[7]  = d; }
+        if j == 8  { let t = deck[8];  deck[6] = t; deck[8]  = d; }
+        if j == 9  { let t = deck[9];  deck[6] = t; deck[9]  = d; }
+        if j == 10 { let t = deck[10]; deck[6] = t; deck[10] = d; }
+        if j == 11 { let t = deck[11]; deck[6] = t; deck[11] = d; }
+        if j == 12 { let t = deck[12]; deck[6] = t; deck[12] = d; }
+        if j == 13 { let t = deck[13]; deck[6] = t; deck[13] = d; }
+        if j == 14 { let t = deck[14]; deck[6] = t; deck[14] = d; }
+        if j == 15 { let t = deck[15]; deck[6] = t; deck[15] = d; }
+        if j == 16 { let t = deck[16]; deck[6] = t; deck[16] = d; }
+        if j == 17 { let t = deck[17]; deck[6] = t; deck[17] = d; }
+        if j == 18 { let t = deck[18]; deck[6] = t; deck[18] = d; }
+        if j == 19 { let t = deck[19]; deck[6] = t; deck[19] = d; }
+        if j == 20 { let t = deck[20]; deck[6] = t; deck[20] = d; }
+        if j == 21 { let t = deck[21]; deck[6] = t; deck[21] = d; }
+        if j == 22 { let t = deck[22]; deck[6] = t; deck[22] = d; }
+        if j == 23 { let t = deck[23]; deck[6] = t; deck[23] = d; }
+        if j == 24 { let t = deck[24]; deck[6] = t; deck[24] = d; }
+        if j == 25 { let t = deck[25]; deck[6] = t; deck[25] = d; }
+        if j == 26 { let t = deck[26]; deck[6] = t; deck[26] = d; }
+        if j == 27 { let t = deck[27]; deck[6] = t; deck[27] = d; }
+        if j == 28 { let t = deck[28]; deck[6] = t; deck[28] = d; }
+        if j == 29 { let t = deck[29]; deck[6] = t; deck[29] = d; }
+        if j == 30 { let t = deck[30]; deck[6] = t; deck[30] = d; }
+        if j == 31 { let t = deck[31]; deck[6] = t; deck[31] = d; }
+        if j == 32 { let t = deck[32]; deck[6] = t; deck[32] = d; }
+        if j == 33 { let t = deck[33]; deck[6] = t; deck[33] = d; }
+        if j == 34 { let t = deck[34]; deck[6] = t; deck[34] = d; }
+        if j == 35 { let t = deck[35]; deck[6] = t; deck[35] = d; }
+        if j == 36 { let t = deck[36]; deck[6] = t; deck[36] = d; }
+        if j == 37 { let t = deck[37]; deck[6] = t; deck[37] = d; }
+        if j == 38 { let t = deck[38]; deck[6] = t; deck[38] = d; }
+        if j == 39 { let t = deck[39]; deck[6] = t; deck[39] = d; }
+        if j == 40 { let t = deck[40]; deck[6] = t; deck[40] = d; }
+        if j == 41 { let t = deck[41]; deck[6] = t; deck[41] = d; }
+        if j == 42 { let t = deck[42]; deck[6] = t; deck[42] = d; }
+        if j == 43 { let t = deck[43]; deck[6] = t; deck[43] = d; }
+        if j == 44 { let t = deck[44]; deck[6] = t; deck[44] = d; }
+        if j == 45 { let t = deck[45]; deck[6] = t; deck[45] = d; }
+        if j == 46 { let t = deck[46]; deck[6] = t; deck[46] = d; }
+        if j == 47 { let t = deck[47]; deck[6] = t; deck[47] = d; }
+        if j == 48 { let t = deck[48]; deck[6] = t; deck[48] = d; }
+        if j == 49 { let t = deck[49]; deck[6] = t; deck[49] = d; }
+        if j == 50 { let t = deck[50]; deck[6] = t; deck[50] = d; }
+        if j == 51 { let t = deck[51]; deck[6] = t; deck[51] = d; }
     }
 
     fn oblivious_swap_7(deck: &mut [u64; 52], j: u64) {
-        let d7 = deck[7];
-        let mut k = 7usize;
-        while k < 52 {
-            let dk = deck[k];
-            if j == k as u64 {
-                deck[7] = dk;
-                deck[k] = d7;
-            }
-            k += 1;
-        }
+        let d = deck[7];
+        if j == 8  { let t = deck[8];  deck[7] = t; deck[8]  = d; }
+        if j == 9  { let t = deck[9];  deck[7] = t; deck[9]  = d; }
+        if j == 10 { let t = deck[10]; deck[7] = t; deck[10] = d; }
+        if j == 11 { let t = deck[11]; deck[7] = t; deck[11] = d; }
+        if j == 12 { let t = deck[12]; deck[7] = t; deck[12] = d; }
+        if j == 13 { let t = deck[13]; deck[7] = t; deck[13] = d; }
+        if j == 14 { let t = deck[14]; deck[7] = t; deck[14] = d; }
+        if j == 15 { let t = deck[15]; deck[7] = t; deck[15] = d; }
+        if j == 16 { let t = deck[16]; deck[7] = t; deck[16] = d; }
+        if j == 17 { let t = deck[17]; deck[7] = t; deck[17] = d; }
+        if j == 18 { let t = deck[18]; deck[7] = t; deck[18] = d; }
+        if j == 19 { let t = deck[19]; deck[7] = t; deck[19] = d; }
+        if j == 20 { let t = deck[20]; deck[7] = t; deck[20] = d; }
+        if j == 21 { let t = deck[21]; deck[7] = t; deck[21] = d; }
+        if j == 22 { let t = deck[22]; deck[7] = t; deck[22] = d; }
+        if j == 23 { let t = deck[23]; deck[7] = t; deck[23] = d; }
+        if j == 24 { let t = deck[24]; deck[7] = t; deck[24] = d; }
+        if j == 25 { let t = deck[25]; deck[7] = t; deck[25] = d; }
+        if j == 26 { let t = deck[26]; deck[7] = t; deck[26] = d; }
+        if j == 27 { let t = deck[27]; deck[7] = t; deck[27] = d; }
+        if j == 28 { let t = deck[28]; deck[7] = t; deck[28] = d; }
+        if j == 29 { let t = deck[29]; deck[7] = t; deck[29] = d; }
+        if j == 30 { let t = deck[30]; deck[7] = t; deck[30] = d; }
+        if j == 31 { let t = deck[31]; deck[7] = t; deck[31] = d; }
+        if j == 32 { let t = deck[32]; deck[7] = t; deck[32] = d; }
+        if j == 33 { let t = deck[33]; deck[7] = t; deck[33] = d; }
+        if j == 34 { let t = deck[34]; deck[7] = t; deck[34] = d; }
+        if j == 35 { let t = deck[35]; deck[7] = t; deck[35] = d; }
+        if j == 36 { let t = deck[36]; deck[7] = t; deck[36] = d; }
+        if j == 37 { let t = deck[37]; deck[7] = t; deck[37] = d; }
+        if j == 38 { let t = deck[38]; deck[7] = t; deck[38] = d; }
+        if j == 39 { let t = deck[39]; deck[7] = t; deck[39] = d; }
+        if j == 40 { let t = deck[40]; deck[7] = t; deck[40] = d; }
+        if j == 41 { let t = deck[41]; deck[7] = t; deck[41] = d; }
+        if j == 42 { let t = deck[42]; deck[7] = t; deck[42] = d; }
+        if j == 43 { let t = deck[43]; deck[7] = t; deck[43] = d; }
+        if j == 44 { let t = deck[44]; deck[7] = t; deck[44] = d; }
+        if j == 45 { let t = deck[45]; deck[7] = t; deck[45] = d; }
+        if j == 46 { let t = deck[46]; deck[7] = t; deck[46] = d; }
+        if j == 47 { let t = deck[47]; deck[7] = t; deck[47] = d; }
+        if j == 48 { let t = deck[48]; deck[7] = t; deck[48] = d; }
+        if j == 49 { let t = deck[49]; deck[7] = t; deck[49] = d; }
+        if j == 50 { let t = deck[50]; deck[7] = t; deck[50] = d; }
+        if j == 51 { let t = deck[51]; deck[7] = t; deck[51] = d; }
     }
 
     fn oblivious_swap_8(deck: &mut [u64; 52], j: u64) {
-        let d8 = deck[8];
-        let mut k = 8usize;
-        while k < 52 {
-            let dk = deck[k];
-            if j == k as u64 {
-                deck[8] = dk;
-                deck[k] = d8;
-            }
-            k += 1;
-        }
+        let d = deck[8];
+        if j == 9  { let t = deck[9];  deck[8] = t; deck[9]  = d; }
+        if j == 10 { let t = deck[10]; deck[8] = t; deck[10] = d; }
+        if j == 11 { let t = deck[11]; deck[8] = t; deck[11] = d; }
+        if j == 12 { let t = deck[12]; deck[8] = t; deck[12] = d; }
+        if j == 13 { let t = deck[13]; deck[8] = t; deck[13] = d; }
+        if j == 14 { let t = deck[14]; deck[8] = t; deck[14] = d; }
+        if j == 15 { let t = deck[15]; deck[8] = t; deck[15] = d; }
+        if j == 16 { let t = deck[16]; deck[8] = t; deck[16] = d; }
+        if j == 17 { let t = deck[17]; deck[8] = t; deck[17] = d; }
+        if j == 18 { let t = deck[18]; deck[8] = t; deck[18] = d; }
+        if j == 19 { let t = deck[19]; deck[8] = t; deck[19] = d; }
+        if j == 20 { let t = deck[20]; deck[8] = t; deck[20] = d; }
+        if j == 21 { let t = deck[21]; deck[8] = t; deck[21] = d; }
+        if j == 22 { let t = deck[22]; deck[8] = t; deck[22] = d; }
+        if j == 23 { let t = deck[23]; deck[8] = t; deck[23] = d; }
+        if j == 24 { let t = deck[24]; deck[8] = t; deck[24] = d; }
+        if j == 25 { let t = deck[25]; deck[8] = t; deck[25] = d; }
+        if j == 26 { let t = deck[26]; deck[8] = t; deck[26] = d; }
+        if j == 27 { let t = deck[27]; deck[8] = t; deck[27] = d; }
+        if j == 28 { let t = deck[28]; deck[8] = t; deck[28] = d; }
+        if j == 29 { let t = deck[29]; deck[8] = t; deck[29] = d; }
+        if j == 30 { let t = deck[30]; deck[8] = t; deck[30] = d; }
+        if j == 31 { let t = deck[31]; deck[8] = t; deck[31] = d; }
+        if j == 32 { let t = deck[32]; deck[8] = t; deck[32] = d; }
+        if j == 33 { let t = deck[33]; deck[8] = t; deck[33] = d; }
+        if j == 34 { let t = deck[34]; deck[8] = t; deck[34] = d; }
+        if j == 35 { let t = deck[35]; deck[8] = t; deck[35] = d; }
+        if j == 36 { let t = deck[36]; deck[8] = t; deck[36] = d; }
+        if j == 37 { let t = deck[37]; deck[8] = t; deck[37] = d; }
+        if j == 38 { let t = deck[38]; deck[8] = t; deck[38] = d; }
+        if j == 39 { let t = deck[39]; deck[8] = t; deck[39] = d; }
+        if j == 40 { let t = deck[40]; deck[8] = t; deck[40] = d; }
+        if j == 41 { let t = deck[41]; deck[8] = t; deck[41] = d; }
+        if j == 42 { let t = deck[42]; deck[8] = t; deck[42] = d; }
+        if j == 43 { let t = deck[43]; deck[8] = t; deck[43] = d; }
+        if j == 44 { let t = deck[44]; deck[8] = t; deck[44] = d; }
+        if j == 45 { let t = deck[45]; deck[8] = t; deck[45] = d; }
+        if j == 46 { let t = deck[46]; deck[8] = t; deck[46] = d; }
+        if j == 47 { let t = deck[47]; deck[8] = t; deck[47] = d; }
+        if j == 48 { let t = deck[48]; deck[8] = t; deck[48] = d; }
+        if j == 49 { let t = deck[49]; deck[8] = t; deck[49] = d; }
+        if j == 50 { let t = deck[50]; deck[8] = t; deck[50] = d; }
+        if j == 51 { let t = deck[51]; deck[8] = t; deck[51] = d; }
     }
 }
