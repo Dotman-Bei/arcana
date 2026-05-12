@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --felt-dark: #0a2218;
+  --gold: #f5c842;
+}
+
+body {
+  background: var(--felt-dark);
+  color: #e5e5e5;
+  font-family: system-ui, sans-serif;
+  margin: 0;
+}
+
+/* Playing card face */
+.card-face {
+  @apply relative w-16 h-24 rounded-lg border-2 border-white/20 bg-white text-gray-900
+         flex flex-col justify-between p-1.5 font-card select-none shadow-xl;
+}
+
+.card-face.red { @apply text-red-600; }
+.card-face.black { @apply text-gray-900; }
+
+/* Face-down card */
+.card-back {
+  @apply w-16 h-24 rounded-lg border-2 border-white/20 bg-gradient-to-br
+         from-blue-800 to-blue-950 shadow-xl;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.05) 0px,
+    rgba(255,255,255,0.05) 1px,
+    transparent 1px,
+    transparent 8px
+  );
+}
+
+/* Poker chip pulse animation */
+@keyframes chip-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 200, 66, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(245, 200, 66, 0); }
+}
+.chip-pulse { animation: chip-pulse 2s infinite; }
+
+/* Felt table gradient */
+.felt-table {
+  background: radial-gradient(ellipse at center, #0d3320 0%, #071a10 100%);
+  border: 4px solid #2a5c3a;
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.8);
+}
