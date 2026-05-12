@@ -19,7 +19,7 @@ pub(crate) use instructions::{
 };
 
 // Placeholder — replaced with the actual program ID after `anchor build && anchor deploy`.
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("ETDyB55bRcVFF8sJrjc5oLwJ6KevLchoo3etzvkG7RHC");
 
 /// Byte offset of the encrypted_state field inside the serialised Table account.
 ///
