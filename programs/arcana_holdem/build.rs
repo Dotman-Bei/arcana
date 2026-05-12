@@ -15,11 +15,9 @@ fn main() {
 
     // All locations where `arcium build` might write the circuit binary.
     let candidates = [
-        workspace_root.join("build/deal_cards.arcis"),               // arcium build default
-        workspace_root.join("arcium_compute/deal_cards.arcis"),      // arcium_compute root
-        workspace_root.join("arcium_compute/build/deal_cards.arcis"),// arcium_compute/build
-        workspace_root.join("encrypted-ixs/deal_cards.arcis"),       // arcium CLI convention root
-        workspace_root.join("encrypted-ixs/build/deal_cards.arcis"), // arcium CLI convention build
+        workspace_root.join("encrypted-ixs/deal_cards.arcis"),       // arcium build → encrypted-ixs/
+        workspace_root.join("encrypted-ixs/build/deal_cards.arcis"), // arcium build → encrypted-ixs/build/
+        workspace_root.join("build/deal_cards.arcis"),               // arcium build → project build/
         workspace_root.join("deal_cards.arcis"),                     // workspace root fallback
     ];
 

@@ -1,5 +1,5 @@
 [workspace]
-members = ["programs/arcana_holdem", "arcium_compute"]
+members = ["programs/arcana_holdem", "encrypted-ixs"]
 resolver = "2"
 
 [workspace.package]
